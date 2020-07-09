@@ -3,13 +3,13 @@ class RouteBoxer {
     this.boxes = null; // the list of boxes/
     this.distance = distance; //in KM the distance that we want to find along the path.
     this.marklist = new Array();
-    this.verhicalBoxes = new Array();
+    this.verticalBoxes = new Array();
     this.horizontalBoxes = new Array();
     this.path = path;
     this.map = map;
   }
-  GetVerhicalResult() {
-    return this.resultVerhicalBoxes;
+  GetVerticalResult() {
+    return this.resultVerticalBoxes;
   }
   GetHorizontalResult() {
     return this.resultHorizontalBoxes;
@@ -35,7 +35,7 @@ class RouteBoxer {
   // I try to find the largest latitude, the largest longitude,
   // the smallest latitude and the smallest longitude in the list of geopoints.
   // These 4 values from a bound of the bounded box of the path.
-  FindBoundedBox() {
+  FindCoverBox() {
     var pointList = this.path;
     var maxLat = -190;
     var maxLng = -190;
@@ -69,7 +69,7 @@ class RouteBoxer {
   //Generate box list and display on the map
   GenerateBoxes() {
     if (distance === 0) return;
-    var boundedBox = this.FindBoundedBox();
+    var boundedBox = this.FindCoverBox();
     var dLat = this.distance / 110.574;
     var dLng = this.distance / 111.320;
     var currentRightBound = boundedBox.bounds.west - 3 * dLng;
@@ -97,14 +97,14 @@ class RouteBoxer {
     }
   }
   //Mark all boxes that are crossed by the path.
-  MarkBoxes() {
+  MarkBoxes(method = 'cohen-sutherland') {
     var r = this.boxes.length;
     var c = this.boxes[0].length;
     var pathLength = this.path.length - 1;
     for (var i = 1; i < r - 1; ++i) {
       for (var j = 1; j < c - 1; ++j) {
         for (var k = 0; k < pathLength; ++k) {
-          var isMarked = this.boxes[i][j].Mark(this.path[k], this.path[k + 1]);
+          var isMarked = this.boxes[i][j].Mark(this.path[k], this.path[k + 1], method);
           if (isMarked) {
             this.marklist.push({ x: i, y: j });
           }
@@ -189,8 +189,8 @@ class RouteBoxer {
     this.DrawBoxes(temp);
     await this.sleep(sleeptime);
     this.ClearBoxesOfTheListOnMap(temp);
-    this.verhicalBoxes = this.GetResult(temp);
-    this.DrawBoxes(this.verhicalBoxes, Box.MERGECOLOR());
+    this.verticalBoxes = this.GetResult(temp);
+    this.DrawBoxes(this.verticalBoxes, Box.MERGECOLOR());
   }
   HorizontalMerge(boxes) {
     var r = boxes.length;

@@ -9,7 +9,8 @@ function initMap() {
 
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 18,
-    center: {lat: 10.762666, lng: 106.682352}
+    center: {lat: 10.762666, lng: 106.682352},
+    mapTypeId: google.maps.MapTypeId.HYBRID
   });
   var khtnMaker = new google.maps.Marker({
     position:{lat:  10.762666, lng: 106.682352},
@@ -87,8 +88,6 @@ function calculateAndDisplayRoute(map, directionsService, directionsRenderer) {
         console.log(polyline);
         var distance = document.getElementById('distance').value;
         var routeboxer = new RouteBoxer(map, polyline, distance);
-        _bounds = routeboxer.FindBoundedBox().bounds;
-        console.log(_bounds);
         /*
         for(var okay = 0; okay < polyline.length;++okay){
           var khtnMaker = new google.maps.Marker({

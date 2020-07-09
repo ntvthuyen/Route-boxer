@@ -29,8 +29,8 @@ class Box{
     GetBounds(){
       return this.bounds;
     }
-    Mark(point1, point2){
-      if(this.IsCrossOrContainALine(point1,point2)){
+    Mark(point1, point2, method){
+      if(this.IsCrossOrContainALine(point1,point2, method)){
         this.isMarked = true;
         if(this.rectangle !== null){
           this.rectangle.setOptions({
@@ -70,8 +70,10 @@ class Box{
     // This function will return a boolean variable.
     // I'm using Cohen Sutherland line clipping algorithm to check it.
     // This is algorithm to check if a line is on the screen or outside the screen using in Computer Graphic.
-    IsCrossOrContainALine(point1, point2){
-      return this.CohenSutherlandAlgorithm(point1, point2);
+    IsCrossOrContainALine(point1, point2, method){
+      if(method == 'cohen-sutherland')
+        return this.CohenSutherlandAlgorithm(point1, point2);
+      else return false;
     }
     CohenSutherlandAlgorithm(point1, point2){
       var x1 = point1.lng;
