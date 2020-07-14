@@ -1,5 +1,5 @@
 class RouteBoxer {
-  constructor(map, path, distance) {
+  constructor(map, path, distance, method) {
     this.boxes = null; // the list of boxes/
     this.distance = distance; //in KM the distance that we want to find along the path.
     this.marklist = new Array();
@@ -7,6 +7,7 @@ class RouteBoxer {
     this.horizontalBoxes = new Array();
     this.path = path;
     this.map = map;
+    this.boxcheckingmethod = method;
   }
   GetVerticalResult() {
     return this.resultVerticalBoxes;
@@ -22,7 +23,7 @@ class RouteBoxer {
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
       Math.sin(dLng / 2) * Math.sin(dLng / 2)
-      ;
+    ;
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // Distance in km
     return d;
@@ -67,7 +68,7 @@ class RouteBoxer {
     }
   }
   //Generate box list and display on the map
-  GenerateBoxes() {
+  GenerateBoxes(draw = true) {
     if (distance === 0) return;
     var boundedBox = this.FindCoverBox();
     var dLat = this.distance / 110.574;
@@ -92,19 +93,19 @@ class RouteBoxer {
       for (var j = 0; j < lngList.length - 1; ++j) {
         var bound = { north: latList[i], south: latList[i + 1], west: lngList[j], east: lngList[j + 1] };
         this.boxes[i].push(new Box(i, j, bound));
-        this.boxes[i][j].DrawBox(this.map);
+        if(draw)this.boxes[i][j].DrawBox(this.map);
       }
     }
   }
   //Mark all boxes that are crossed by the path.
-  MarkBoxes(method = 'cohen-sutherland') {
+  MarkBoxes() {
     var r = this.boxes.length;
     var c = this.boxes[0].length;
     var pathLength = this.path.length - 1;
     for (var i = 1; i < r - 1; ++i) {
       for (var j = 1; j < c - 1; ++j) {
         for (var k = 0; k < pathLength; ++k) {
-          var isMarked = this.boxes[i][j].Mark(this.path[k], this.path[k + 1], method);
+          var isMarked = this.boxes[i][j].Mark(this.path[k], this.path[k + 1], this.boxcheckingmethod);
           if (isMarked) {
             this.marklist.push({ x: i, y: j });
           }
@@ -153,6 +154,24 @@ class RouteBoxer {
   //sleep function
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  RouteBoxerAlgorithm(mode){
+    if(mode == 'horizontal'){
+      this.GenerateBoxes(this.map);
+      this.MarkBoxes();
+      this.Expanded();
+      var temp = this.HorizontalMerge(this.boxes);
+      this.horizontalBoxes = this.GetResult(temp); 
+      this.DrawBoxes(this.horizontalBoxes, Box.MERGECOLOR()); 
+    } else {
+      this.GenerateBoxes(this.map);
+      this.MarkBoxes();
+      this.Expanded();
+      var temp = this.VerticalMerge(this.boxes);
+      this.verticalBoxes = this.GetResult(temp); 
+      this.DrawBoxes(this.verticalBoxes, Box.MERGECOLOR()); 
+
+    }
   }
   // The main function of routeboxer algorithm
   // map is the google map object

@@ -70,21 +70,24 @@ class Box{
   // I'm using Cohen Sutherland line clipping algorithm to check it.
   // This is algorithm to check if a line is on the screen or outside the screen using in Computer Graphic.
   IsCrossOrContainALine(point1, point2, method){
-    if(method == 'cohen-sutherland' && false)
+    if(method == 'cohen-sutherland')
       return this.CohenSutherlandAlgorithm(point1, point2);
-    else if (method == 'liang-barsky' || true){
+    else if (method == 'liang-barsky'){
       return this.LiangBarskyAlgorithm(point1,point2);
+    }
+    else if(method == 'cyrus-beck'){
+      return this.CyrusBeckAlgorithm(point1,point2);
     }
   }
   CohenSutherlandAlgorithm(point1, point2){
     var x1 = point1.lng;
-    var y1 = point1.lat;
+    var y1 = point1.lat * 2;
     var x2 = point2.lng;
-    var y2 = point2.lat;
+    var y2 = point2.lat * 2;
     var xmax = this.bounds.east;
     var xmin = this.bounds.west;
-    var ymax = this.bounds.north;
-    var ymin = this.bounds.south;
+    var ymax = this.bounds.north * 2;
+    var ymin = this.bounds.south * 2;
     // Regions:
     // 1001 1000 1010
     // 0001 0000 0010
@@ -143,71 +146,78 @@ class Box{
     var xmin = this.bounds.west;
     var ymax = this.bounds.north;
     var ymin = this.bounds.south;
-
-    var p1 = -(x2 - x1);
-    var p2 = -p1;
-    var p3 = -(y2 - y1);
-    var p4 = -p3;
-
-    var q1 = x1 - xmin;
-    var q2 = xmax - x1;
-    var q3 = y1 - ymin;
-    var q4 = ymax - y1;
-    if(((p1 == 0) && (q1 < 0)) 
-      ||(((p2 == 0) && q2 < 0))
-      ||((p3 == 0) &&  (q3 < 0)) 
-      ||((p4 == 0) && (q4 < 0))){
-      return false;
-    }
-
-    if((q1 < 0) 
-      || (q2 < 0) 
-      || (q3 < 0) 
-      || (q4 < 0)){
-      return false;
-    }
-    if((q1 >= 0) 
-      || (q2 >= 0) 
-      || (q3 >= 0) 
-      || (q4 >= 0)){
-      return true;
+    var p = new Array();
+    p.push(x1 - x2);
+    p.push(x2 - x1);
+    p.push(y1 - y2);
+    p.push(y2 - y1);
+    var q = new Array();
+    q.push(x1 - xmin);
+    q.push(xmax - x1);
+    q.push(y1 - ymin);
+    q.push(ymax - y1);
+    for(var i = 0; i < 4; ++i){
+      if(p[i] == 0){
+        if(q[i] < 0) return false;
+      }
     }
     var pos = new Array();
     var neg = new Array();
     pos.push(1);
     neg.push(0);
-    if(p1 != 0){
-      var r1 = q1/p1;
-      var r2 = q2/p2;
-      if(p1 < 0){
-        neg.push(r1);
-        pos.push(r2);
-      } else {
-        neg.push(r2);
-        pos.push(r1);
-      }
+    for(var i = 0; i < 4; ++i){
+      var r = q[i]/p[i];
+      if(p[i] > 0) pos.push(r);
+      else neg.push(r);
     }
-    if(p3 != 0){
-      var r3 = q3/p3;
-      var r4 = q4/p4;
-      if(q3 < 0){
-        neg.push(r3);
-        pos.push(r4);
-      } else {
-        neg.push(r4);
-        pos.push(r3);
-      }
+    var t1 = Math.max.apply(null,neg);
+    var t2 = Math.min.apply(null,pos);
+    if(t1 > t2) {
+      return false;
     }
-    var rn1 = Math.max.apply(null,neg);
-    var rn2 = Math.min.apply(null,pos);
-    console.log(rn1);
-    console.log(rn2);
-    if(rn1 > rn2) return false;
-    else return true;
-    
+    return true;    
   }
   CyrusBeckAlgorithm(point1, point2){
-
+    var xmax = this.bounds.east;
+    var xmin = this.bounds.west;
+    var ymax = this.bounds.north;
+    var ymin = this.bounds.south;
+    var pE = new Array();
+    var x1 = point1.lng;
+    var y1 = point1.lat;
+    var x2 = point2.lng;
+    var y2 = point2.lat;
+    pE.push({x: xmin, y: ymax});
+    pE.push({x: xmax, y: ymin});
+    pE.push({x: xmax, y: ymax});
+    pE.push({x: xmax, y: ymin});
+    var N = new Array();
+    var left_norm = {x: ymax - ymin, y: 0};
+    var right_norm = {x: ymin - ymax, y: 0};
+    var top_norm = {x: 0, y: xmin - xmax};
+    var bottom_norm = {x: 0, y: xmax - xmin};
+    N.push(left_norm);
+    N.push(right_norm);
+    N.push(top_norm);
+    N.push(bottom_norm);
+    var tL = new Array();
+    var tE = new Array(); 
+    for(var i = 0; i < 4; ++i){
+      var numerator = N[i].x * (pE[i].x - x1) + N[i].y * (pE[i].y -y1);
+      var denominator = (N[i].x*(x2 - x1) + N[i].y*(y2 - y1));
+      var m = numerator / denominator; 
+      if(denominator > 0){  
+        tE.push(m);
+      } else
+      if(denominator < 0){
+        tL.push(m);
+      }
+      else return false;
+    }
+    tE.push(0);
+    tL.push(1);
+    if(Math.min.apply(null,tL) < Math.max.apply(null,tE)) return false;
+    return true;
   }
   Merge(box){
     var resultBox = null;

@@ -83,29 +83,15 @@ function calculateAndDisplayRoute(map, directionsService, directionsRenderer) {
     },
     function(response, status) {
       if (status === 'OK') {
+        var boxcheckingmethod = document.getElementById('method').value;
+        var mode = document.getElementById('mode').value;
         var polyline = decodePolyline(response.routes[0].overview_polyline);
         directionsRenderer.setDirections(response);
         console.log(polyline);
         var distance = document.getElementById('distance').value;
-        var routeboxer = new RouteBoxer(map, polyline, distance);
-        /*
-        for(var okay = 0; okay < polyline.length;++okay){
-          var khtnMaker = new google.maps.Marker({
-            position:{lat:  polyline[okay].lat, lng: polyline[okay].lng},
-            map: map,
-            icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-          })
-        }*/
-        /*var rectangle = new google.maps.Rectangle({
-          strokeColor: '#FF0000',
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: '#FF0000',
-          fillOpacity: 0.35,
-          map: map,
-          bounds: _bounds,
-        });*/
-        routeboxer.VisualizeRouteBoxerAlgorithm(3); 
+        var routeboxer = new RouteBoxer(map, polyline, distance, boxcheckingmethod);
+        if(mode == 'visualization')
+          routeboxer.VisualizeRouteBoxerAlgorithm(3); 
       } else {
         window.alert('Directions request failed due to ' + status);
       }
