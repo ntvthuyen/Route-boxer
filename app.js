@@ -91,7 +91,11 @@ function calculateAndDisplayRoute(map, directionsService, directionsRenderer) {
         var distance = document.getElementById('distance').value;
         var routeboxer = new RouteBoxer(map, polyline, distance, boxcheckingmethod);
         if(mode == 'visualization')
-          routeboxer.VisualizeRouteBoxerAlgorithm(3); 
+          routeboxer.VisualizeRouteBoxerAlgorithm(3);
+        if(mode == 'horizontal')
+          routeboxer.RouteBoxerAlgorithm(mode);
+        if(mode == 'vertical')
+          routeboxer.RouteBoxerAlgorithm(mode);
       } else {
         window.alert('Directions request failed due to ' + status);
       }

@@ -157,14 +157,14 @@ class RouteBoxer {
   }
   RouteBoxerAlgorithm(mode){
     if(mode == 'horizontal'){
-      this.GenerateBoxes(this.map);
+      this.GenerateBoxes(false);
       this.MarkBoxes();
       this.Expanded();
       var temp = this.HorizontalMerge(this.boxes);
       this.horizontalBoxes = this.GetResult(temp); 
       this.DrawBoxes(this.horizontalBoxes, Box.MERGECOLOR()); 
     } else {
-      this.GenerateBoxes(this.map);
+      this.GenerateBoxes(false);
       this.MarkBoxes();
       this.Expanded();
       var temp = this.VerticalMerge(this.boxes);
@@ -179,7 +179,7 @@ class RouteBoxer {
   async VisualizeRouteBoxerAlgorithm(sleeptime) {
     sleeptime = sleeptime * 1000;
     await this.sleep(sleeptime);
-    this.GenerateBoxes(this.map);
+    this.GenerateBoxes();
     await this.sleep(sleeptime);
     this.MarkBoxes();
     await this.sleep(sleeptime);
@@ -196,7 +196,7 @@ class RouteBoxer {
     this.ClearBoxesOfTheListOnMap(this.horizontalBoxes);
     this.boxes = new Array();
     this.marklist = new Array();
-    this.GenerateBoxes(this.map);
+    this.GenerateBoxes();
     await this.sleep(sleeptime);
     this.MarkBoxes();
     await this.sleep(sleeptime);
@@ -267,6 +267,7 @@ class RouteBoxer {
       boxes = null;
     }
   }
+  // Draw boxes on the map.
   DrawBoxes(boxes, color = null) {
     var length = boxes.length;
     if (color != null) {
@@ -279,6 +280,7 @@ class RouteBoxer {
       }
     }
   }
+  // Get result function merge result from horizontal or verticala merge step
   GetResult(boxes) {
     var result = new Array();
     var length = boxes.length;
