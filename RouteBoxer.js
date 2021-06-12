@@ -31,8 +31,8 @@ class RouteBoxer {
   deg2rad(deg) {
     return deg * (Math.PI / 180)
   }
-  // This function found the bounded box of the path google direction api has found
-  // The idea to found the bouneded box is simple.
+  // This function finds the bounded box of the path google direction api has found
+  // The idea to find the bouneded box is simple.
   // I try to find the largest latitude, the largest longitude,
   // the smallest latitude and the smallest longitude in the list of geopoints.
   // These 4 values from a bound of the bounded box of the path.
